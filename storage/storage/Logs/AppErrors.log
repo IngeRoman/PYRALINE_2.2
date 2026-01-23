@@ -1,0 +1,5 @@
+[2026-01-21 21:10:25] LugarDAO.DataHelperSQLiteDAO ❱ No suitable driver found for jdbc:sqlite:storage\Databases\antCiberDron.sqlite
+[2026-01-21 21:12:22] LugarDAO.DataHelperSQLiteDAO ❱ No suitable driver found for jdbc:sqlite:storage\Databases\antCiberDron.sqlite
+[2026-01-21 21:13:58] LugarDAO.Constructor ❱ Driver SQLite no encontrado en el classpath
+[2026-01-21 21:18:55] LugarDAO.Constructor ❱ Driver SQLite no encontrado. Verifique la carpeta 'lib'.
+[2026-01-21 21:23:24] LugarDAO.Constructor ❱ Driver SQLite no encontrado. Verifique la carpeta 'lib'.

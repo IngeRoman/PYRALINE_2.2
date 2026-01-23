@@ -1,0 +1,6 @@
+[2026-01-22 23:37:57] PYRALINEDAO.readAll() ❱ [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+[2026-01-22 23:43:20] LugarDAO.Constructor ❱ Falta Driver SQLite.
+[2026-01-22 23:43:34] LugarDAO.Constructor ❱ Falta Driver SQLite.
+[2026-01-22 23:46:21] PYRALINEDAO.readAll() ❱ [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+[2026-01-22 23:52:03] LugarDAO.readAll ❱ [SQLITE_ERROR] SQL error or missing database (no such table: Lugar)
+[2026-01-22 23:53:48] LugarDAO.readAll ❱ [SQLITE_ERROR] SQL error or missing database (no such table: Lugar)

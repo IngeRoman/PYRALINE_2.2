@@ -1,0 +1,76 @@
+╭─💀─ SHOW ❱❱ No sape mi errores 
+╰──── LOG  ❱❱ 2026-01-12 12:06:36 | undefined.main() | / by zero
+╭─💀─ SHOW ❱❱ Error al dividir por cero 
+╰──── LOG  ❱❱ 2026-01-13 00:04:02 | undefined.main(...) | / by zero
+╭─💀─ SHOW ❱❱ Error al dividir por cero 
+╰──── LOG  ❱❱ 2026-01-13 00:06:04 | undefined.main(...) | / by zero
+╭─💀─ SHOW ❱❱ Error al dividir por cero 
+╰──── LOG  ❱❱ 2026-01-13 00:07:52 | undefined.main(...) | / by zero
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-15 01:18:38 | HormigaDAO.create | [SQLITE_CONSTRAINT_UNIQUE] A UNIQUE constraint failed (UNIQUE constraint failed: Hormiga.Nombre)
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntCoor 
+╰──── LOG  ❱❱ 2026-01-20 00:14:44 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntFood 
+╰──── LOG  ❱❱ 2026-01-20 00:14:44 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntNest 
+╰──── LOG  ❱❱ 2026-01-20 00:14:44 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntCoor 
+╰──── LOG  ❱❱ 2026-01-20 00:15:28 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntFood 
+╰──── LOG  ❱❱ 2026-01-20 00:15:28 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntNest 
+╰──── LOG  ❱❱ 2026-01-20 00:15:28 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntCoor 
+╰──── LOG  ❱❱ 2026-01-20 00:16:48 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntFood 
+╰──── LOG  ❱❱ 2026-01-20 00:16:48 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntNest 
+╰──── LOG  ❱❱ 2026-01-20 00:16:48 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntCoor 
+╰──── LOG  ❱❱ 2026-01-20 00:18:08 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntFood 
+╰──── LOG  ❱❱ 2026-01-20 00:18:08 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Error en config/app.properties : df.AntNest 
+╰──── LOG  ❱❱ 2026-01-20 00:18:08 | undefined.undefined | Ups! Error inesperado. Por favor, contacte al administrador del sistema.
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 10:39:36 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such column: Estado)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 10:39:57 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such column: Estado)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 10:44:52 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such column: Estado)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 10:46:24 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such column: Estado)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 10:48:20 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 12:14:05 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 12:22:40 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 12:47:37 | PYRALINEDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 13:00:02 | PYRALINEDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 14:51:07 | PYRALINEDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 14:53:51 | PYRALINEDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 14:54:12 | PYRALINEDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 14:56:21 | EstadoAlertaDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: EstadoAlerta)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 14:57:08 | EstadoAlertaDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: EstadoAlerta)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 15:08:09 | EstadoAlertaDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: EstadoAlerta)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 15:25:01 | LugarDAO.readBy | [SQLITE_ERROR] SQL error or missing database (no such table: Lugar)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 15:28:52 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 15:29:16 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 15:35:37 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 15:40:33 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
+╭─💀─ SHOW ❱❱ Ups! Error inesperado. Por favor, contacte al administrador del sistema. 
+╰──── LOG  ❱❱ 2026-01-21 15:47:51 | PYRALINEDAO.readAll | [SQLITE_ERROR] SQL error or missing database (no such table: wsPRYLINE)
