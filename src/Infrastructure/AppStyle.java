@@ -1,39 +1,27 @@
-//  © 2K26 ❱──💀──❰ pat_mic ? code is life : life is code
 package Infrastructure;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-
-import javax.swing.BorderFactory;
-import javax.swing.SwingConstants;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public abstract class AppStyle {
     private static final String FONT_FAMILY     = "NovaMono";
     
-    public static final Color COLOR_FONT        = new Color(220, 10, 20); //(218, 8, 40)
+    // LO QUE YA TENÍAS (No se toca)
+    public static final Color COLOR_ACCENT      = new Color(255, 85, 0);   // Naranja Neón
+    public static final Color COLOR_FONT        = new Color(220, 10, 20);  // Rojo técnico
     public static final Color COLOR_FONT_LIGHT  = new Color(100, 100, 100);
-    public static final Color COLOR_CURSOR      = Color.black;
-    public static final Color COLOR_BORDER      = Color.lightGray;
-
-    public static final Font  FONT              = new Font(FONT_FAMILY, Font.PLAIN, 14);
-    public static final Font  FONT_SMALL        = new Font(FONT_FAMILY, Font.PLAIN, 10);
-    public static final Font  FONT_BOLD         = new Font(FONT_FAMILY, Font.BOLD | Font.PLAIN, 15);
-
-    public static final int ALIGNMENT_LEFT  = SwingConstants.LEFT;
-    public static final int ALIGNMENT_RIGHT = SwingConstants.RIGHT;
-    public static final int ALIGNMENT_CENTER= SwingConstants.CENTER;
-
-    public static final Cursor CURSOR_HAND    = new Cursor(Cursor.HAND_CURSOR);
-    public static final Cursor CURSOR_DEFAULT = new Cursor(Cursor.DEFAULT_CURSOR);
-
-    private AppStyle() {}
+    public static final Color COLOR_CURSOR      = Color.BLACK;
+    public static final Font FONT               = new Font(FONT_FAMILY, Font.PLAIN, 14);
+    public static final Font FONT_BOLD          = new Font(FONT_FAMILY, Font.BOLD, 15);
+    public static final Cursor CURSOR_HAND      = new Cursor(Cursor.HAND_CURSOR);
     public static final CompoundBorder createBorderRect(){
-        return BorderFactory.createCompoundBorder(  new LineBorder(Color.lightGray),
-                                                    new EmptyBorder(5, 5, 5, 5));
+        return BorderFactory.createCompoundBorder(new LineBorder(COLOR_ACCENT), new EmptyBorder(5, 5, 5, 5));
     }
-}
 
+    // --- ADICIONALES PARA EL DASHBOARD ---
+    public static final Color COLOR_PURPLE      = new Color(160, 0, 255);  // Morado Cyberpunk
+    public static final Color COLOR_BG          = new Color(10, 10, 10);   // Fondo oscuro profundo
+    public static final Color COLOR_NORMAL      = new Color(0, 255, 120);  // Verde Neón (Estado OK)
+    public static final Font  FONT_TITLE        = new Font(FONT_FAMILY, Font.BOLD, 28);
+}

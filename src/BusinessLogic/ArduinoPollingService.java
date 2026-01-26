@@ -2,48 +2,71 @@ package BusinessLogic;
 
 import DataAccess.DAOs.PYRALINEDAO;
 import DataAccess.DTOs.PYRALINEDTO;
+import Infrastructure.AppConfig; // Importación necesaria para la persistencia
 import Infrastructure.AppException;
+import UserInterface.Form.PyralineDashboard;
 
 public class ArduinoPollingService {
     private PYRALINEDAO pyralineDAO;
-    private final float UMBRAL_MAXIMO = 70.0f; // Configura aquí tu límite de alarma
-    private final int ID_LUGAR_ACTUAL = 2;     // Ej: Zona de Servidores
+    private PyralineDashboard dashboard;
+    private float umbralAlarma; // Variable dinámica
+    private boolean alertaActiva = false;
 
-    public ArduinoPollingService() throws AppException {
+    public ArduinoPollingService(PyralineDashboard dash) throws AppException {
         this.pyralineDAO = new PYRALINEDAO();
+        this.dashboard = dash;
+        // CARGA INICIAL: Lee el valor guardado en el archivo .properties
+        this.umbralAlarma = AppConfig.getUmbralPersistido(); 
     }
 
     /**
-     * Este método debe ser llamado cada vez que llega una línea de texto
-     * desde el puerto Serial del Arduino.
+     * Actualiza el umbral en tiempo real y lo guarda permanentemente en disco.
      */
-    public void procesarLecturaArduino(String rawData) {
+    public void setUmbralAlarma(float nuevoUmbral) {
+        this.umbralAlarma = nuevoUmbral;
+        // PERSISTENCIA: Se graba en el archivo para que no se pierda al reiniciar
+        AppConfig.guardarUmbral(nuevoUmbral); 
+        System.out.println(">>> [SISTEMA] Umbral guardado permanentemente: " + nuevoUmbral + "°C");
+    }
+
+    public void procesarLectura(String rawData) {
         try {
-            // 1. Limpiar y convertir el dato
-            float temperatura = Float.parseFloat(rawData.trim());
+            float tempActual = Float.parseFloat(rawData.trim());
+            // Comparamos contra la variable dinámica cargada desde memoria
+            boolean sobreUmbral = tempActual > umbralAlarma; 
 
-            // 2. MOSTRAR SIEMPRE (Requisito: El usuario debe ver la temperatura actual)
-            System.out.println("Monitoreo actual: " + temperatura + "°C");
-            // Aquí llamarías a tu interfaz: dashboard.updateTemp(temperatura);
-
-            // 3. LOGICA DE ALARMA (Requisito: Solo guardar si ocurre una alarma)
-            if (temperatura >= UMBRAL_MAXIMO) {
-                registrarAlarmaEnBaseDatos(temperatura);
+            if (dashboard != null) {
+                dashboard.actualizarMonitoreo(tempActual, sobreUmbral);
             }
 
-        } catch (NumberFormatException e) {
-            System.err.println("Error: El Arduino envió un dato no numérico: " + rawData);
-        } catch (AppException e) {
-            System.err.println("Error de persistencia: " + e.getMessage());
+            if (sobreUmbral && !alertaActiva) {
+                System.out.println(">>> Registrando ALERTA (ID 1)...");
+                registrarEvento(tempActual, 1); 
+                alertaActiva = true;
+            } 
+            else if (!sobreUmbral && alertaActiva) {
+                System.out.println(">>> Registrando NORMALIDAD (ID 3)...");
+                registrarEvento(tempActual, 3); 
+                alertaActiva = false;
+            }
+        } catch (Exception e) {
+            System.err.println("(!) Error: " + e.getMessage());
         }
     }
 
-    private void registrarAlarmaEnBaseDatos(float valorTemperatura) throws AppException {
-        // IdTipoAlerta 1 = 'Exceso de Temperatura' según nuestro script SQL
-        PYRALINEDTO alarma = new PYRALINEDTO(ID_LUGAR_ACTUAL, 1, valorTemperatura);
-        
-        if (pyralineDAO.create(alarma)) {
-            System.out.println("⚠️ [ALERTA] Temperatura crítica guardada en historial.");
+    private void registrarEvento(float valor, int tipo) {
+        try {
+            PYRALINEDTO registro = new PYRALINEDTO(1, tipo, valor);
+            boolean exito = pyralineDAO.create(registro);
+            
+            if (exito) {
+                System.out.println("(✓) GUARDADO REAL EN DB: Tipo " + tipo);
+                if (dashboard != null) {
+                    dashboard.refrescarHistorial(); 
+                }
+            }
+        } catch (AppException e) {
+            System.err.println("(!) ERROR DE SQLITE: " + e.getMessage());
         }
     }
 }

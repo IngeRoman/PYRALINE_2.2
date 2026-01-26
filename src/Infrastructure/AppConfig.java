@@ -2,6 +2,7 @@ package Infrastructure;
 
 import Infrastructure.Tools.CMD;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -22,6 +23,28 @@ public abstract class AppConfig {
 
     public static String getDATABASE() { return props.getProperty("db.File"); }
     public static String getLOGFILE()  { return props.getProperty("df.logFile"); }
+    
+    // --- NUEVAS FUNCIONES PARA PERSISTENCIA DEL UMBRAL ---
+
+    /**
+     * Recupera el umbral guardado. Si no existe, devuelve 32.0 por defecto.
+     */
+    public static float getUmbralPersistido() { 
+        return Float.parseFloat(props.getProperty("app.umbral", "32.0")); 
+    }
+
+    /**
+     * Guarda el nuevo umbral físicamente en el archivo app.properties.
+     */
+    public static void guardarUmbral(float valor) {
+        props.setProperty("app.umbral", String.valueOf(valor));
+        try (FileOutputStream out = new FileOutputStream(APP_PROPERTIES)) {
+            props.store(out, "Configuracion Pyraline - Mateo Sebastian");
+        } catch (Exception e) {
+            System.err.println("(!) Error: No se pudo escribir en app.properties");
+        }
+    }
+
     public static final String MSG_DEFAULT_ERROR = "Error inesperado en el sistema.";
     protected abstract String getImgSplash();
 }

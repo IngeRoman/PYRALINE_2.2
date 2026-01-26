@@ -14,19 +14,30 @@ import java.util.List;
 public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
     
     public PYRALINEDAO() throws AppException {
-        // Apuntamos a la VISTA 'wsPRYLINE' para las lecturas por defecto
         super(PYRALINEDTO.class, "wsPRYLINE", "IdPYRALINE");
     }
 
     /**
-     * Guarda un registro de alarma en la base de datos.
-     * Se debe invocar desde el controlador cuando la temperatura del Arduino 
-     * supere el umbral establecido.
+     * Elimina todos los registros de la tabla física PYRALINE.
+     * Es vital para el botón de mantenimiento del Dashboard.
      */
+    public boolean deleteAll() throws AppException {
+        // Ejecutamos el comando sobre la TABLA física, no sobre la vista.
+        String query = "DELETE FROM PYRALINE"; 
+        try (Connection conn = openConnection();
+             Statement stmt = conn.createStatement()) {
+            
+            stmt.executeUpdate(query);
+            System.out.println(">>> [DAO] Historial vaciado correctamente por Mateo.");
+            return true;
+        } catch (SQLException e) {
+            throw new AppException("Error al vaciar el historial de PYRALINE", e, getClass(), "deleteAll()");
+        }
+    }
+
     @Override
     public boolean create(PYRALINEDTO entity) throws AppException {
         String query = "INSERT INTO PYRALINE (IdLugar, IdTipoAlerta, Temperatura) VALUES (?, ?, ?)";
-        // Usamos try-with-resources para cerrar la conexión automáticamente
         try (Connection conn = openConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             
@@ -37,19 +48,15 @@ public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
-            throw new AppException("Error al registrar alarma en la tabla PYRALINE", e, getClass(), "create()");
+            throw new AppException("Error al registrar alarma en PYRALINE", e, getClass(), "create()");
         }
     }
 
-    /**
-     * Lee el historial completo de alarmas desde la vista wsPRYLINE.
-     * Esta vista ya trae los nombres de los lugares y tipos de alerta unidos (JOIN).
-     */
     @Override
     public List<PYRALINEDTO> readAll() throws AppException {
         List<PYRALINEDTO> lista = new ArrayList<>();
-        // Seleccionamos las columnas tal cual están definidas en la VIEW del script SQL
-        String query = "SELECT IdPYRALINE, Lugar, TipoAlerta, Temperatura, Estado, FechaHora, FechaModifica FROM wsPRYLINE";
+        // Consultamos la vista wsPRYLINE para obtener los datos formateados y ordenados.
+        String query = "SELECT IdPYRALINE, IdTipoAlerta, Temperatura, Estado, FechaHora, FechaModifica FROM wsPRYLINE ORDER BY FechaHora DESC";
         
         try (Connection conn = openConnection();
              Statement stmt = conn.createStatement();
@@ -59,21 +66,16 @@ public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
                 PYRALINEDTO dto = new PYRALINEDTO();
                 
                 dto.setIdPYRALINE(rs.getInt("IdPYRALINE"));
+                dto.setIdTipoAlerta(rs.getInt("IdTipoAlerta")); // Vital para los colores del Dashboard.
                 dto.setTemperatura(rs.getFloat("Temperatura"));
                 dto.setEstado(rs.getString("Estado"));
                 dto.setFechaHora(rs.getString("FechaHora"));
                 dto.setFechaModifica(rs.getString("FechaModifica"));
                 
-                // NOTA: Si tu DTO tiene campos String para los nombres, asígnalos aquí.
-                // Si solo tiene campos int para IDs, estos campos de la vista son informativos.
-                // Ejemplo si usas campos genéricos o el DTO soporta los nombres:
-                // dto.setNombreLugar(rs.getString("Lugar")); 
-                // dto.setNombreAlerta(rs.getString("TipoAlerta"));
-                
                 lista.add(dto);
             }
         } catch (SQLException e) {
-            throw new AppException("Error al leer la vista wsPRYLINE", e, getClass(), "readAll()");
+            throw new AppException("Error al leer la vista wsPRYLINE.", e, getClass(), "readAll()");
         }
         return lista;
     }

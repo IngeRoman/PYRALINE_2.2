@@ -1,13 +1,16 @@
 package Infrastructure;
 
 import com.fazecast.jSerialComm.SerialPort;
+import BusinessLogic.ArduinoPollingService; // Vinculación necesaria
 import java.io.InputStream;
 
 public class ArduinoSensor {
-    private static String ultimaLectura = "0.0";
     private SerialPort puertoSerial;
 
-    public void conectar(String puertoNombre) {
+    /**
+     * Inicia la conexión serial y entrega los datos al servicio de monitoreo.
+     */
+    public void conectar(String puertoNombre, ArduinoPollingService service) {
         puertoSerial = SerialPort.getCommPort(puertoNombre);
         puertoSerial.setBaudRate(9600);
         puertoSerial.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
@@ -24,7 +27,8 @@ public class ArduinoSensor {
                             if (c == '\n' || c == '\r') {
                                 String dato = sb.toString().trim();
                                 if (!dato.isEmpty()) {
-                                    ultimaLectura = dato;
+                                    // Se envía el dato al método procesarLectura del servicio
+                                    service.procesarLectura(dato); 
                                 }
                                 sb.setLength(0);
                             } else {
@@ -34,17 +38,13 @@ public class ArduinoSensor {
                         Thread.sleep(100);
                     }
                 } catch (Exception e) {
-                    System.err.println("(!) Error sensor: " + e.getMessage());
+                    System.err.println("(!) Error en lectura serial: " + e.getMessage());
                 }
             });
             hilo.setDaemon(true); 
             hilo.start();
         } else {
-            System.err.println("(!) ERROR: No se detecta Arduino en " + puertoNombre);
+            System.err.println("(!) ERROR: No se pudo abrir el puerto " + puertoNombre);
         }
-    }
-
-    public static String getUltimaLectura() {
-        return ultimaLectura;
     }
 }
