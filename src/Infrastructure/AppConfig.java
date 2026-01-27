@@ -39,7 +39,7 @@ public abstract class AppConfig {
     public static void guardarUmbral(float valor) {
         props.setProperty("app.umbral", String.valueOf(valor));
         try (FileOutputStream out = new FileOutputStream(APP_PROPERTIES)) {
-            props.store(out, "Configuracion Pyraline - Mateo Sebastian");
+            props.store(out, "Configuracion Pyraline -");
         } catch (Exception e) {
             System.err.println("(!) Error: No se pudo escribir en app.properties");
         }

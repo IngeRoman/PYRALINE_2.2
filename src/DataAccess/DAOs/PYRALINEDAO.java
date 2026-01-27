@@ -28,7 +28,7 @@ public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
              Statement stmt = conn.createStatement()) {
             
             stmt.executeUpdate(query);
-            System.out.println(">>> [DAO] Historial vaciado correctamente por Mateo.");
+            System.out.println(">>> [DAO] Historial vaciado correctamente.");
             return true;
         } catch (SQLException e) {
             throw new AppException("Error al vaciar el historial de PYRALINE", e, getClass(), "deleteAll()");

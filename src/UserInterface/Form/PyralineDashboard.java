@@ -3,7 +3,7 @@ package UserInterface.Form;
 import BusinessLogic.ArduinoPollingService;
 import DataAccess.DAOs.PYRALINEDAO;
 import DataAccess.DTOs.PYRALINEDTO;
-import Infrastructure.AppConfig; // Importación para cargar el umbral guardado
+import Infrastructure.AppConfig; 
 import Infrastructure.AppStyle;
 import UserInterface.Style.BackgroundPanel;
 import java.awt.*;
@@ -20,7 +20,7 @@ public class PyralineDashboard extends JFrame {
     private String currentCard = "CARD_HOME"; 
     private final Color COLOR_PURPLE = new Color(160, 0, 255); 
     
-    // CARGA INICIAL: Ahora lee directamente del archivo app.properties
+    // CARGA INICIAL: Recupera el umbral guardado físicamente en app.properties
     private float valorUmbralTemporal = AppConfig.getUmbralPersistido(); 
     private ArduinoPollingService pollingService;
 
@@ -73,6 +73,38 @@ public class PyralineDashboard extends JFrame {
 
     public void setPollingService(ArduinoPollingService service) {
         this.pollingService = service;
+    }
+
+    /**
+     * MÉTODO REFACTORIZADO: Reacción inmediata ante cambios físicos de hardware.
+     * Limpia la pantalla y muestra el error al desconectar el cable.
+     */
+    public void actualizarEstadoHardware(boolean conectado) {
+        SwingUtilities.invokeLater(() -> {
+            if (conectado) {
+                lblEstado.setText("ESTADO: SISTEMA EN LÍNEA");
+                lblEstado.setForeground(Color.GREEN);
+                lblTemp.setForeground(Color.WHITE);
+            } else {
+                // Alerta roja inmediata para Mateo en la EPN
+                lblEstado.setText("ERROR: SENSOR DESCONECTADO");
+                lblEstado.setForeground(Color.RED);
+                lblTemp.setText("TEMPERATURA: -- °C");
+                lblTemp.setForeground(Color.GRAY);
+                System.err.println("(!) Alerta: El flujo de datos se ha interrumpido.");
+            }
+        });
+    }
+
+    public void actualizarMonitoreo(float temp, boolean esAlerta) {
+        lblTemp.setText("TEMPERATURA: " + String.format("%.2f", temp) + " °C");
+        if (esAlerta) {
+            lblEstado.setText("ESTADO: ALERT");
+            lblEstado.setForeground(AppStyle.COLOR_FONT); 
+        } else {
+            lblEstado.setText("ESTADO: NORMAL");
+            lblEstado.setForeground(Color.GREEN);
+        }
     }
 
     private JPanel crearVistaHome() {
@@ -154,9 +186,9 @@ public class PyralineDashboard extends JFrame {
         
         btnGuardar.addActionListener(e -> {
             if (pollingService != null) {
-                // Sincroniza y guarda permanentemente
+                // Sincroniza y guarda permanentemente en app.properties
                 pollingService.setUmbralAlarma(valorUmbralTemporal);
-                JOptionPane.showMessageDialog(this, "<html><b style='color:green;'>UMBRAL GUARDADO</b><br>El sistema ahora se activará a los " + valorUmbralTemporal + "°C</html>");
+                JOptionPane.showMessageDialog(this, "<html><b style='color:green;'>UMBRAL GUARDADO</b><br>Nuevo límite configurado por Mateo a " + valorUmbralTemporal + "°C</html>");
             }
         });
 
@@ -182,7 +214,6 @@ public class PyralineDashboard extends JFrame {
         lblValorUmbral.setText(String.format("%.1f", valorUmbralTemporal) + " °C  ");
     }
 
-    // --- HISTORIAL CON BOTÓN DE BORRADO ---
     private JPanel crearVistaHistorialMasivo() {
         JPanel pnlMain = new JPanel(new GridBagLayout());
         pnlMain.setOpaque(false);
@@ -216,28 +247,23 @@ public class PyralineDashboard extends JFrame {
         scroll.setBorder(BorderFactory.createEmptyBorder(0, 25, 20, 25));
         pnlContenedor.add(scroll, BorderLayout.CENTER);
 
-        // --- BOTÓN PARA BORRAR HISTORIAL (NUEVO) ---
+        // Botón para vaciar la base de datos física
         JButton btnBorrar = new JButton("LIMPIAR REGISTROS DEL SISTEMA");
         btnBorrar.setFont(AppStyle.FONT_BOLD.deriveFont(12f));
-        btnBorrar.setBackground(new Color(60, 0, 0)); // Rojo táctico
+        btnBorrar.setBackground(new Color(60, 0, 0)); 
         btnBorrar.setForeground(Color.WHITE);
         btnBorrar.setFocusPainted(false);
         btnBorrar.setBorder(new LineBorder(Color.RED, 1));
         
         btnBorrar.addActionListener(e -> {
-            int resp = JOptionPane.showConfirmDialog(this, 
-                "¿Seguro que desea vaciar el historial de la base de datos?", 
-                "Atención Mateo", JOptionPane.YES_NO_OPTION);
+            int resp = JOptionPane.showConfirmDialog(this, "¿Seguro que desea vaciar el historial?", "Atención Mateo", JOptionPane.YES_NO_OPTION);
             if(resp == JOptionPane.YES_OPTION) {
                 try {
-                    // Llama al método de borrado masivo
                     if(new PYRALINEDAO().deleteAll()) {
                         refrescarHistorial();
                         JOptionPane.showMessageDialog(this, "Historial vaciado correctamente.");
                     }
-                } catch (Exception ex) { 
-                    JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
-                }
+                } catch (Exception ex) { }
             }
         });
         pnlContenedor.add(btnBorrar, BorderLayout.SOUTH);
@@ -269,17 +295,6 @@ public class PyralineDashboard extends JFrame {
             html.append("</body></html>");
             txtHistorial.setText(html.toString()); 
         } catch (Exception e) { }
-    }
-
-    public void actualizarMonitoreo(float temp, boolean esAlerta) {
-        lblTemp.setText("TEMPERATURA: " + String.format("%.2f", temp) + " °C");
-        if (esAlerta) {
-            lblEstado.setText("ESTADO: ALERT");
-            lblEstado.setForeground(AppStyle.COLOR_FONT); 
-        } else {
-            lblEstado.setText("ESTADO: NORMAL");
-            lblEstado.setForeground(Color.GREEN);
-        }
     }
 
     private JButton crearBotonNavegacion(String t, String card) {

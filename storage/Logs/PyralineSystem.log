@@ -13,3 +13,75 @@
 [2026-01-24 23:55:06] UsuarioDAO.login() ❱ [SQLITE_ERROR] SQL error or missing database (no such table: Usuario)
 [2026-01-25 19:30:13] UsuarioDAO.login() ❱ [SQLITE_ERROR] SQL error or missing database (no such table: Usuario)
 [2026-01-25 19:30:22] UsuarioDAO.login() ❱ [SQLITE_ERROR] SQL error or missing database (no such table: Usuario)
+[2026-01-26 15:40:04] UsuarioDAO.login() ❱ [SQLITE_ERROR] SQL error or missing database (no such table: Usuario)
+[2026-01-26 16:45:22] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:23] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:24] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:24] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:24] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:24] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:24] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:24] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:24] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:25] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:25] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:25] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:25] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:25] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:25] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:25] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:26] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:27] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:27] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:27] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:27] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:27] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:27] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:27] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:28] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:29] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:29] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:29] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:29] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:29] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:29] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:29] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:45:30] [HARDWARE_ERROR] Desconexión física del sensor Arduino.
+[2026-01-26 16:53:52] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 16:54:08] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 17:00:47] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 17:01:14] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 17:02:53] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 20:30:15] UsuarioDAO.login() ❱ [SQLITE_ERROR] SQL error or missing database (no such table: Usuario)
+[2026-01-26 20:32:58] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 20:33:05] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 20:33:13] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.
+[2026-01-26 20:33:50] [HARDWARE_ERROR] Desconexión física detectada en el hardware de Mateo.

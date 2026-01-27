@@ -21,4 +21,4 @@ INSERT INTO Lugar (Nombre) VALUES ('Zona de Servidores');
 INSERT INTO TipoAlerta (Nombre) VALUES ('Exceso de Temperatura');
 INSERT INTO TipoAlerta (Nombre) VALUES ('Falla de Sensor');
 INSERT INTO TipoAlerta (Nombre) VALUES ('Estado Normal');
-INSERT INTO Usuario (Email, Password, Estado) VALUES ('mateo.rios01@epn.edu.ec', 'admin1234', 'A');
+INSERT INTO Usuario (Email, Password, Estado) VALUES ('pyraline', 'admin1234', 'A');

@@ -2,7 +2,7 @@ package UserInterface.Form;
 
 import BusinessLogic.ArduinoPollingService; 
 import BusinessLogic.UsuarioBL;
-import Infrastructure.*; // Importa ArduinoSensor y AppStyle desde aquí
+import Infrastructure.*; // Importa ArduinoSensor y AppStyle
 import UserInterface.Style.BackgroundPanel;
 import java.awt.*;
 import javax.swing.*;
@@ -84,29 +84,29 @@ public class PyralineLogin extends JFrame {
                 UsuarioBL bl = new UsuarioBL();
                 if (bl.validarAcceso(txtEmail.getText(), new String(txtPassword.getPassword()))) {
                     
-                    // 1. Cerramos el Login para liberar memoria
                     this.dispose();
-
-                    // 2. Creamos la interfaz Dashboard
                     PyralineDashboard dashboard = new PyralineDashboard();
 
                     try {
-                        // 3. Activamos el servicio de monitoreo
                         ArduinoPollingService service = new ArduinoPollingService(dashboard);
-                        
-                        // --- PASO CLAVE: Conectamos la interfaz con el servicio para el cambio de umbral ---
                         dashboard.setPollingService(service);
                         
-                        // 4. Iniciamos el hardware (Ahora con el import de Infrastructure)
+                        // --- MEJORA: AUTO-DETECCIÓN DE PUERTO ---
                         ArduinoSensor sensor = new ArduinoSensor();
-                        sensor.conectar("COM3", service); 
+                        String puertoDetectado = sensor.detectarPuertoAutomatico();
                         
-                        // 5. Mostramos la consola masiva
+                        if (puertoDetectado != null) {
+                            sensor.conectar(puertoDetectado, service);
+                            System.out.println("(✓) Hardware conectado en: " + puertoDetectado);
+                        } else {
+                            System.err.println("(!) Advertencia: No se encontró ningún Arduino conectado.");
+                        }
+                        
                         dashboard.setVisible(true);
                         System.out.println("(✓) Sistema Pyraline activado para Mateo.");
                         
                     } catch (Exception ex) {
-                        System.err.println("(!) Error al conectar hardware: " + ex.getMessage());
+                        System.err.println("(!) Error al iniciar monitoreo: " + ex.getMessage());
                         dashboard.setVisible(true);
                     }
 
