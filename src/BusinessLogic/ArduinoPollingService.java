@@ -43,7 +43,7 @@ public class ArduinoPollingService {
             // El dato ya viene limpio de ArduinoSensor (sin basura ASCII)
             float tempActual = Float.parseFloat(rawData.trim());
             
-            // Comparación contra el umbral gestionado por Mateo
+            // Comparación contra el umbral gestionado por 
             boolean sobreUmbral = tempActual > umbralAlarma; 
 
             if (dashboard != null) {

@@ -85,7 +85,7 @@ public class PyralineDashboard extends JFrame {
                 lblEstado.setForeground(Color.GREEN);
                 lblTemp.setForeground(Color.WHITE);
             } else {
-                // Alerta roja inmediata para Mateo en la EPN
+                // Alerta roja inmediata
                 lblEstado.setText("ERROR: SENSOR DESCONECTADO");
                 lblEstado.setForeground(Color.RED);
                 lblTemp.setText("TEMPERATURA: -- °C");
@@ -187,7 +187,7 @@ public class PyralineDashboard extends JFrame {
             if (pollingService != null) {
                 // Sincroniza y guarda permanentemente en app.properties
                 pollingService.setUmbralAlarma(valorUmbralTemporal);
-                JOptionPane.showMessageDialog(this, "<html><b style='color:green;'>UMBRAL GUARDADO</b><br>Nuevo límite configurado por Mateo a " + valorUmbralTemporal + "°C</html>");
+                JOptionPane.showMessageDialog(this, "<html><b style='color:green;'>UMBRAL GUARDADO</b><br>Nuevo límite configurado " + valorUmbralTemporal + "°C</html>");
             }
         });
 
@@ -255,7 +255,7 @@ public class PyralineDashboard extends JFrame {
         btnBorrar.setBorder(new LineBorder(Color.RED, 1));
         
         btnBorrar.addActionListener(e -> {
-            int resp = JOptionPane.showConfirmDialog(this, "¿Seguro que desea vaciar el historial?", "Atención Mateo", JOptionPane.YES_NO_OPTION);
+            int resp = JOptionPane.showConfirmDialog(this, "¿Seguro que desea vaciar el historial?", "Atención ", JOptionPane.YES_NO_OPTION);
             if(resp == JOptionPane.YES_OPTION) {
                 try {
                     if(new PYRALINEDAO().deleteAll()) {

@@ -103,7 +103,7 @@ public class PyralineLogin extends JFrame {
                         }
                         
                         dashboard.setVisible(true);
-                        System.out.println("(✓) Sistema Pyraline activado para Mateo.");
+                        System.out.println("(✓) Sistema Pyraline activado .");
                         
                     } catch (Exception ex) {
                         System.err.println("(!) Error al iniciar monitoreo: " + ex.getMessage());

@@ -85,7 +85,7 @@ public class ArduinoSensor {
 
         if (puertoSerial != null) puertoSerial.closePort();
         if (service != null) service.notificarEstadoConexion(false);
-        registrarErrorEnLog("Desconexión física detectada en el hardware de Mateo.");
+        registrarErrorEnLog("Desconexión física detectada en el hardware .");
 
         new Thread(() -> {
             while (intentandoReconectar) {
