@@ -1,5 +1,4 @@
 package DataAccess.DAOs;
-
 import DataAccess.DTOs.PYRALINEDTO;
 import DataAccess.Helpers.DataHelperSQLiteDAO;
 import Infrastructure.AppException;
