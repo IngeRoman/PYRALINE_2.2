@@ -91,22 +91,25 @@ public class PyralineLogin extends JFrame {
                         ArduinoPollingService service = new ArduinoPollingService(dashboard);
                         dashboard.setPollingService(service);
                         
-                        // --- MEJORA: AUTO-DETECCIÓN DE PUERTO ---
+                        // --- REFACTORIZACIÓN: DETECCIÓN ACTIVA ---
                         ArduinoSensor sensor = new ArduinoSensor();
                         String puertoDetectado = sensor.detectarPuertoAutomatico();
                         
+                        // Siempre llamamos a conectar. Si puertoDetectado es null,
+                        // el sensor activará solo el hilo de búsqueda infinita.
+                        sensor.conectar(puertoDetectado, service); 
+                        
                         if (puertoDetectado != null) {
-                            sensor.conectar(puertoDetectado, service);
-                            System.out.println("(✓) Hardware conectado en: " + puertoDetectado);
+                            System.out.println("(✓) Hardware detectado en: " + puertoDetectado);
                         } else {
-                            System.err.println("(!) Advertencia: No se encontró ningún Arduino conectado.");
+                            System.err.println("(!) Sistema iniciado en modo búsqueda: Esperando conexión física.");
                         }
                         
                         dashboard.setVisible(true);
-                        System.out.println("(✓) Sistema Pyraline activado .");
+                        System.out.println("(✓) Sistema Pyraline activado para Mateo Sebastian.");
                         
                     } catch (Exception ex) {
-                        System.err.println("(!) Error al iniciar monitoreo: " + ex.getMessage());
+                        System.err.println("(!) Error al iniciar servicios de Pyraline: " + ex.getMessage());
                         dashboard.setVisible(true);
                     }
 

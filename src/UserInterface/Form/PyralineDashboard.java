@@ -1,4 +1,5 @@
 package UserInterface.Form;
+
 import BusinessLogic.ArduinoPollingService;
 import DataAccess.DAOs.PYRALINEDAO;
 import DataAccess.DTOs.PYRALINEDTO;
@@ -8,18 +9,21 @@ import UserInterface.Style.BackgroundPanel;
 import java.awt.*;
 import java.net.URL;
 import java.util.List;
+import javax.sound.sampled.*; // Para el soporte de audio .wav
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
 public class PyralineDashboard extends JFrame {
-    private JLabel lblTemp, lblEstado, lblLogo, lblValorUmbral;
+    private JLabel lblTemp, lblEstado, lblLogo, lblValorUmbral, lblSirena;
     private JPanel pnlCards; 
     private CardLayout cardLayout;
     private JTextPane txtHistorial;
+    private Timer timerParpadeo; // Para el efecto visual de emergencia
+    private Clip clipAlerta;     // Para la sirena de YouTube (.wav)
+    private boolean esRojo = false;
     private String currentCard = "CARD_HOME"; 
     private final Color COLOR_PURPLE = new Color(160, 0, 255); 
     
-    // CARGA INICIAL: Recupera el umbral guardado físicamente en app.properties
     private float valorUmbralTemporal = AppConfig.getUmbralPersistido(); 
     private ArduinoPollingService pollingService;
 
@@ -32,6 +36,9 @@ public class PyralineDashboard extends JFrame {
         BackgroundPanel mainPanel = new BackgroundPanel();
         mainPanel.configurarDashboard("Splash.png"); 
         setContentPane(mainPanel);
+
+        // --- CARGA DE RECURSOS (Audio de Mateo) ---
+        configurarAudio("/Infrastructure/resources/sounds/alarma.wav");
 
         // --- SIDEBAR ---
         JPanel sidebar = new JPanel();
@@ -68,16 +75,50 @@ public class PyralineDashboard extends JFrame {
         pnlCards.add(crearVistaConfiguracion(), "CARD_CONFIG");
 
         mainPanel.add(pnlCards, BorderLayout.CENTER);
+
+        // --- TIMER DE ALERTA VISUAL ---
+        timerParpadeo = new Timer(500, e -> {
+            lblSirena.setVisible(!lblSirena.isVisible());
+            esRojo = !esRojo;
+            lblEstado.getParent().setBackground(esRojo ? new Color(120, 0, 0) : new Color(0, 0, 0, 0));
+        });
     }
 
-    public void setPollingService(ArduinoPollingService service) {
-        this.pollingService = service;
+    private void configurarAudio(String ruta) {
+        try {
+            URL soundUrl = getClass().getResource(ruta);
+            if (soundUrl != null) {
+                AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundUrl);
+                clipAlerta = AudioSystem.getClip();
+                clipAlerta.open(audioStream);
+            }
+        } catch (Exception e) {
+            System.err.println("(!) Error al cargar audio: " + e.getMessage());
+        }
     }
 
     /**
-     * MÉTODO REFACTORIZADO: Reacción inmediata ante cambios físicos de hardware.
-     * Limpia la pantalla y muestra el error al desconectar el cable.
+     * MÉTODO MAESTRO: Controla la emergencia (Visual + Sonoro).
      */
+    public void setModoAlerta(boolean activa) {
+        SwingUtilities.invokeLater(() -> {
+            if (activa) {
+                if (!timerParpadeo.isRunning()) {
+                    timerParpadeo.start();
+                    if (clipAlerta != null) {
+                        clipAlerta.setFramePosition(0);
+                        clipAlerta.loop(Clip.LOOP_CONTINUOUSLY); // Suena hasta apagar la alerta
+                    }
+                }
+            } else {
+                timerParpadeo.stop();
+                if (clipAlerta != null) clipAlerta.stop();
+                lblSirena.setVisible(false);
+                lblEstado.getParent().setBackground(new Color(0, 0, 0, 0));
+            }
+        });
+    }
+
     public void actualizarEstadoHardware(boolean conectado) {
         SwingUtilities.invokeLater(() -> {
             if (conectado) {
@@ -85,12 +126,11 @@ public class PyralineDashboard extends JFrame {
                 lblEstado.setForeground(Color.GREEN);
                 lblTemp.setForeground(Color.WHITE);
             } else {
-                // Alerta roja inmediata
+                setModoAlerta(false); // Apagamos sirenas si no hay hardware
                 lblEstado.setText("ERROR: SENSOR DESCONECTADO");
                 lblEstado.setForeground(Color.RED);
                 lblTemp.setText("TEMPERATURA: -- °C");
                 lblTemp.setForeground(Color.GRAY);
-                System.err.println("(!) Alerta: El flujo de datos se ha interrumpido.");
             }
         });
     }
@@ -123,8 +163,15 @@ public class PyralineDashboard extends JFrame {
         lblEstado.setFont(AppStyle.FONT_BOLD.deriveFont(18f));
         lblEstado.setForeground(Color.GREEN);
 
+        // Icono de Sirena
+        lblSirena = new JLabel();
+        ImageIcon iconSirena = cargarIcono("/Infrastructure/resources/img/sirena.png", 100, 100);
+        if (iconSirena != null) lblSirena.setIcon(iconSirena);
+        lblSirena.setVisible(false);
+
         gbcM.gridy = 0; gbcM.insets = new Insets(0, 0, 15, 0); pnlMonitor.add(lblTemp, gbcM);
         gbcM.gridy = 1; gbcM.insets = new Insets(15, 0, 0, 0); pnlMonitor.add(lblEstado, gbcM);
+        gbcM.gridy = 2; gbcM.insets = new Insets(20, 0, 0, 0); pnlMonitor.add(lblSirena, gbcM);
 
         GridBagConstraints gbcP = new GridBagConstraints();
         gbcP.anchor = GridBagConstraints.CENTER;
@@ -185,9 +232,8 @@ public class PyralineDashboard extends JFrame {
         
         btnGuardar.addActionListener(e -> {
             if (pollingService != null) {
-                // Sincroniza y guarda permanentemente en app.properties
                 pollingService.setUmbralAlarma(valorUmbralTemporal);
-                JOptionPane.showMessageDialog(this, "<html><b style='color:green;'>UMBRAL GUARDADO</b><br>Nuevo límite configurado " + valorUmbralTemporal + "°C</html>");
+                JOptionPane.showMessageDialog(this, "<html><b style='color:green;'>UMBRAL GUARDADO</b><br>Límite actualizado a " + valorUmbralTemporal + "°C</html>");
             }
         });
 
@@ -246,7 +292,6 @@ public class PyralineDashboard extends JFrame {
         scroll.setBorder(BorderFactory.createEmptyBorder(0, 25, 20, 25));
         pnlContenedor.add(scroll, BorderLayout.CENTER);
 
-        // Botón para vaciar la base de datos física
         JButton btnBorrar = new JButton("LIMPIAR REGISTROS DEL SISTEMA");
         btnBorrar.setFont(AppStyle.FONT_BOLD.deriveFont(12f));
         btnBorrar.setBackground(new Color(60, 0, 0)); 
@@ -255,7 +300,7 @@ public class PyralineDashboard extends JFrame {
         btnBorrar.setBorder(new LineBorder(Color.RED, 1));
         
         btnBorrar.addActionListener(e -> {
-            int resp = JOptionPane.showConfirmDialog(this, "¿Seguro que desea vaciar el historial?", "Atención ", JOptionPane.YES_NO_OPTION);
+            int resp = JOptionPane.showConfirmDialog(this, "¿Seguro que desea vaciar el historial?", "Atención Mateo", JOptionPane.YES_NO_OPTION);
             if(resp == JOptionPane.YES_OPTION) {
                 try {
                     if(new PYRALINEDAO().deleteAll()) {
@@ -294,6 +339,10 @@ public class PyralineDashboard extends JFrame {
             html.append("</body></html>");
             txtHistorial.setText(html.toString()); 
         } catch (Exception e) { }
+    }
+
+    public void setPollingService(ArduinoPollingService service) {
+        this.pollingService = service;
     }
 
     private JButton crearBotonNavegacion(String t, String card) {

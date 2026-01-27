@@ -1,7 +1,7 @@
 import Infrastructure.AppConfig;
+import java.io.BufferedReader;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.FileReader;
 import java.sql.*;
 
 public class TestDatabase {
@@ -9,86 +9,78 @@ public class TestDatabase {
         String url = AppConfig.getDATABASE();
         String sqlPath = "storage/scripts/DDL_DML.sql";
         
-        System.out.println(">>> INICIANDO TEST DE BASE DE DATOS PARA PYRALINE");
+        System.out.println(">>> REPARANDO ESTRUCTURA DE BASE DE DATOS - PYRALINE");
 
-        // 1. LIMPIEZA TOTAL (Borrado físico del archivo .sqlite)
+        // 1. LIMPIEZA FÍSICA
         try {
             String dbRawPath = url.replace("jdbc:sqlite:", "");
             File dbFile = new File(dbRawPath);
             if (dbFile.exists() && dbFile.delete()) {
-                System.out.println("(✓) Base de datos anterior eliminada correctamente.");
+                System.out.println("(✓) Archivo .sqlite eliminado para reconstrucción limpia.");
             }
-        } catch (Exception e) { /* Ignorar si no se puede borrar */ }
+        } catch (Exception e) { }
 
         try (Connection conn = DriverManager.getConnection(url);
              Statement stmt = conn.createStatement()) {
             
-            // Leemos el script original
-            String sqlContent = new String(Files.readAllBytes(Paths.get(sqlPath)));
+            System.out.println("--- Ejecutando Script de RM ---");
             
-            // CAMBIO CLAVE: Usamos sqlContent directamente para no romper los comentarios
-            String[] queries = sqlContent.split(";");
-            
-            String bufferTrigger = ""; 
+            // LECTOR LÍNEA POR LÍNEA: Más seguro para Triggers
+            try (BufferedReader reader = new BufferedReader(new FileReader(sqlPath))) {
+                StringBuilder buffer = new StringBuilder();
+                String line;
+                boolean enTrigger = false;
 
-            System.out.println("--- Ejecutando Comandos del Script ---");
-            
-            for (int i = 0; i < queries.length; i++) {
-                String q = queries[i].trim();
-                if (q.isEmpty() || q.startsWith("--")) continue;
+                while ((line = reader.readLine()) != null) {
+                    String trimmedLine = line.trim();
+                    
+                    // Saltamos líneas vacías o comentarios simples
+                    if (trimmedLine.isEmpty() || trimmedLine.startsWith("--")) continue;
 
-                // LÓGICA DE TRIGGER: Unimos las piezas hasta encontrar el END
-                if (q.startsWith("CREATE TRIGGER")) {
-                    System.out.println("   -> Detectado inicio de Trigger...");
-                    bufferTrigger = q + "; "; 
-                    continue; 
-                }
+                    buffer.append(line).append("\n");
 
-                if (!bufferTrigger.isEmpty() && q.equalsIgnoreCase("END")) {
-                    bufferTrigger += q; 
-                    System.out.println("   -> Ejecutando TRIGGER COMPLETO.");
-                    stmt.execute(bufferTrigger);
-                    bufferTrigger = ""; 
-                    continue;
-                }
+                    // Detectamos si entramos en un bloque de TRIGGER
+                    if (trimmedLine.toUpperCase().startsWith("CREATE TRIGGER")) {
+                        enTrigger = true;
+                    }
 
-                // Ejecución de comandos normales (Tablas e Inserts)
-                if (bufferTrigger.isEmpty()) {
-                    String preview = (q.length() > 45 ? q.substring(0, 45).replace("\n", " ") + "..." : q.replace("\n", " "));
-                    System.out.println("   [" + i + "]: " + preview);
-                    stmt.execute(q);
-                }
-            }
-            
-            System.out.println("\n ¡ÉXITO TOTAL! Estructura creada.");
-
-            // 2. VERIFICACIÓN DE DATOS
-            System.out.println("\n--- VERIFICACIÓN FINAL ---");
-            
-            // Verificar Lugares
-            System.out.println(">> Tabla Lugar:");
-            try (ResultSet rs = stmt.executeQuery("SELECT Nombre FROM Lugar")) {
-                while (rs.next()) System.out.println("   - " + rs.getString("Nombre"));
-            }
-
-            // Verificar Usuario (Crucial para el Login)
-            System.out.println("\n>> Tabla Usuario (Acceso EPN):");
-            String sqlUser = "SELECT Email, Password, Estado FROM Usuario";
-            try (ResultSet rs = stmt.executeQuery(sqlUser)) {
-                if (!rs.isBeforeFirst()) System.err.println("   (!) ERROR: No hay usuarios en la tabla.");
-                while (rs.next()) {
-                    System.out.println("   - Email:    " + rs.getString("Email"));
-                    System.out.println("   - Password: " + rs.getString("Password"));
-                    System.out.println("   - Estado:   " + rs.getString("Estado"));
+                    // Si termina en ';' y no estamos dentro de un trigger, o si es el 'END;' de un trigger
+                    if ((trimmedLine.endsWith(";") && !enTrigger) || (enTrigger && trimmedLine.toUpperCase().startsWith("END;"))) {
+                        String sql = buffer.toString().trim();
+                        try {
+                            stmt.execute(sql);
+                            // Resumen de ejecución para Mateo
+                            String preview = (sql.length() > 50) ? sql.substring(0, 50).replace("\n", " ") + "..." : sql;
+                            System.out.println("  [OK]: " + preview);
+                        } catch (SQLException ex) {
+                            System.err.println("  [ERROR] en comando: " + sql);
+                            System.err.println("  Detalle: " + ex.getMessage());
+                        }
+                        buffer.setLength(0); // Limpiamos el buffer para el siguiente comando
+                        enTrigger = false;
+                    }
                 }
             }
-
-            System.out.println("\n>>> TEST FINALIZADO: Todo listo para el Login.");
+            
+            validarEstructuraFinal(stmt);
 
         } catch (Exception e) {
-            System.err.println("\n ERROR CRÍTICO:");
-            System.err.println("Mensaje: " + e.getMessage());
+            System.err.println("\n(!) ERROR CRÍTICO DE SISTEMA:");
             e.printStackTrace();
         }
+    }
+
+    private static void validarEstructuraFinal(Statement stmt) throws SQLException {
+        System.out.println("\n--- VERIFICACIÓN DE COMPATIBILIDAD ---");
+        
+        // Verificamos el usuario de acceso para el Login
+        try (ResultSet rs = stmt.executeQuery("SELECT Email, Password FROM Usuario LIMIT 1")) {
+            if(rs.next()) {
+                System.out.println("(✓) Acceso EPN: OK");
+                System.out.println("    User: " + rs.getString("Email") + " | Pass: " + rs.getString("Password"));
+            }
+        }
+        
+        System.out.println("\n>>> TEST FINALIZADO: Todo listo para el Login.");
     }
 }

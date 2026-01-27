@@ -25,6 +25,7 @@ public class ArduinoSensor {
     }
 
     public void conectar(String puertoNombre, ArduinoPollingService service) {
+        // REFACTORIZACIÓN: Si no hay puerto al inicio, activamos el escaneo de una vez
         if (puertoNombre == null) {
             manejarDesconexion(service);
             return;
@@ -32,7 +33,6 @@ public class ArduinoSensor {
 
         puertoSerial = SerialPort.getCommPort(puertoNombre);
         puertoSerial.setBaudRate(9600);
-        // Timeout para que el hilo no se quede bloqueado eternamente
         puertoSerial.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 200, 0);
 
         if (puertoSerial.openPort()) {
@@ -43,16 +43,13 @@ public class ArduinoSensor {
             Thread hilo = new Thread(() -> {
                 try (InputStream in = puertoSerial.getInputStream()) {
                     StringBuilder sb = new StringBuilder();
-                    while (!intentandoReconectar) {
-                        // VERIFICACIÓN FÍSICA: Si bytesAvailable es -1, el cable NO está
-                        if (puertoSerial.bytesAvailable() == -1) {
-                            break; 
-                        }
+                    while (!intentandoReconectar && puertoSerial.isOpen()) {
+                        // Verificación de integridad física del cable
+                        if (puertoSerial.bytesAvailable() == -1) break; 
 
                         if (in.available() > 0) {
                             int byteRead = in.read();
                             if (byteRead == -1) break;
-                            
                             char c = (char) byteRead;
                             if (c == '\n' || c == '\r') {
                                 String dato = sb.toString().trim().replaceAll("[^\\d.]", ""); 
@@ -84,9 +81,12 @@ public class ArduinoSensor {
         intentandoReconectar = true;
 
         if (puertoSerial != null) puertoSerial.closePort();
+        
+        // Notificamos al Dashboard de la EPN que el sensor no está
         if (service != null) service.notificarEstadoConexion(false);
-        registrarErrorEnLog("Desconexión física detectada en el hardware .");
+        registrarErrorEnLog("Sistema iniciado sin hardware o conexión perdida.");
 
+        // Bucle infinito de búsqueda
         new Thread(() -> {
             while (intentandoReconectar) {
                 System.out.println(">>> [BÚSQUEDA] Escaneando puertos USB...");
@@ -104,7 +104,7 @@ public class ArduinoSensor {
         try (FileWriter fw = new FileWriter(AppConfig.getLOGFILE(), true);
              PrintWriter pw = new PrintWriter(fw)) {
             String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            pw.println("[" + fecha + "] [HARDWARE_ERROR] " + mensaje);
+            pw.println("[" + fecha + "] [HARDWARE] " + mensaje);
         } catch (Exception e) { }
     }
 }

@@ -15,13 +15,12 @@ public class ArduinoPollingService {
     public ArduinoPollingService(PyralineDashboard dash) throws AppException {
         this.pyralineDAO = new PYRALINEDAO();
         this.dashboard = dash;
-        // CARGA INICIAL: Recupera el umbral guardado en app.properties
+        // CARGA INICIAL: Recupera el umbral guardado por Mateo en el archivo .properties
         this.umbralAlarma = AppConfig.getUmbralPersistido(); 
     }
 
     /**
-     * MÉTODO CLAVE: Notifica al Dashboard sobre el estado del cable USB.
-     * Es el encargado de que la alarma roja de error aparezca o desaparezca.
+     * Notifica al Dashboard sobre el estado del cable USB.
      */
     public void notificarEstadoConexion(boolean conectado) {
         if (dashboard != null) {
@@ -40,26 +39,34 @@ public class ArduinoPollingService {
 
     public void procesarLectura(String rawData) {
         try {
-            // El dato ya viene limpio de ArduinoSensor (sin basura ASCII)
+            // El dato ya viene limpio de ArduinoSensor
             float tempActual = Float.parseFloat(rawData.trim());
             
-            // Comparación contra el umbral gestionado por 
+            // Comparación contra el umbral gestionado por Mateo Sebastian
             boolean sobreUmbral = tempActual > umbralAlarma; 
 
             if (dashboard != null) {
                 dashboard.actualizarMonitoreo(tempActual, sobreUmbral);
-            }
 
-            // --- LÓGICA DE REGISTRO EN BASE DE DATOS ---
-            if (sobreUmbral && !alertaActiva) {
-                System.out.println(">>> [LOG] Registrando ALERTA (ID 1) en SQLite...");
-                registrarEvento(tempActual, 1); 
-                alertaActiva = true;
-            } 
-            else if (!sobreUmbral && alertaActiva) {
-                System.out.println(">>> [LOG] Registrando NORMALIDAD (ID 3) en SQLite...");
-                registrarEvento(tempActual, 3); 
-                alertaActiva = false;
+                // --- LÓGICA DE ALERTA VISUAL Y SONORA ---
+                if (sobreUmbral && !alertaActiva) {
+                    System.out.println(">>> [ALERTA] ¡Temperatura Crítica! Activando sirena...");
+                    
+                    // Ordenamos al Dashboard activar la sirena y el sonido
+                    dashboard.setModoAlerta(true); 
+                    
+                    registrarEvento(tempActual, 1); 
+                    alertaActiva = true;
+                } 
+                else if (!sobreUmbral && alertaActiva) {
+                    System.out.println(">>> [SISTEMA] Regreso a normalidad. Desactivando sirena...");
+                    
+                    // Ordenamos al Dashboard apagar la sirena
+                    dashboard.setModoAlerta(false); 
+                    
+                    registrarEvento(tempActual, 3); 
+                    alertaActiva = false;
+                }
             }
         } catch (Exception e) {
             System.err.println("(!) Error al procesar dato térmico: " + e.getMessage());
