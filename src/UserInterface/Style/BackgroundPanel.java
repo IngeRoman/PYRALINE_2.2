@@ -6,14 +6,14 @@ import javax.swing.*;
 
 public class BackgroundPanel extends JPanel {
     private Image imgCircuits;
-    private boolean mostrarCuadricula = false; // Nuevo: Para el estilo técnico del Dashboard
+    private boolean mostrarCuadricula = false; 
 
     public BackgroundPanel() {
-        this.imgCircuits = cargarImagen("Splash.png"); // Mantiene lo actual
+        this.imgCircuits = cargarImagen("Splash.png"); 
         this.setLayout(null);
     }
 
-    // NUEVO: Método para cambiar el fondo sin borrar el Splash original
+    
     public void configurarDashboard(String nombreImagen) {
         this.imgCircuits = cargarImagen(nombreImagen);
         this.mostrarCuadricula = true;

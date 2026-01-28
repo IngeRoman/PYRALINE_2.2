@@ -4,58 +4,65 @@ import BusinessLogic.ArduinoPollingService;
 import DataAccess.DAOs.PYRALINEDAO;
 import DataAccess.DTOs.PYRALINEDTO;
 import Infrastructure.AppConfig; 
+import Infrastructure.AppException;
+import Infrastructure.AppMSG;
 import Infrastructure.AppStyle;
 import UserInterface.Style.BackgroundPanel;
 import java.awt.*;
 import java.net.URL;
 import java.util.List;
-import javax.sound.sampled.*; // Para el soporte de audio .wav
+import javax.sound.sampled.*; 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
+/**
+ * Dashboard principal del sistema Pyraline.
+ * Gestiona la visualización de sensores, bitácora histórica y configuración.
+ * @version 2.2
+ */
 public class PyralineDashboard extends JFrame {
     private JLabel lblTemp, lblEstado, lblLogo, lblValorUmbral, lblSirena;
     private JPanel pnlCards; 
     private CardLayout cardLayout;
     private JTextPane txtHistorial;
-    private Timer timerParpadeo; // Para el efecto visual de emergencia
-    private Clip clipAlerta;     // Para la sirena de YouTube (.wav)
+    private Timer timerParpadeo; 
+    private Clip clipAlerta;     
     private boolean esRojo = false;
-    private String currentCard = "CARD_HOME"; 
     private final Color COLOR_PURPLE = new Color(160, 0, 255); 
     
     private float valorUmbralTemporal = AppConfig.getUmbralPersistido(); 
     private ArduinoPollingService pollingService;
 
     public PyralineDashboard() {
+        configurarVentana();
+        inicializarUI();
+    }
+
+    /** Configuración inicial de la ventana principal. */
+    private void configurarVentana() {
         setTitle("PYRALINE SYSTEM - DASHBOARD");
         setSize(1000, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+    }
 
+    /** Carga de paneles, recursos y estilos. */
+    private void inicializarUI() {
         BackgroundPanel mainPanel = new BackgroundPanel();
         mainPanel.configurarDashboard("Splash.png"); 
         setContentPane(mainPanel);
 
-        // --- CARGA DE RECURSOS (Audio de Mateo) ---
+        // Intenta cargar la sirena para alertas críticas
         configurarAudio("/Infrastructure/resources/sounds/alarma.wav");
 
-        // --- SIDEBAR ---
+        // --- CONSTRUCCIÓN DE SIDEBAR ---
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS)); 
         sidebar.setOpaque(false);
         sidebar.setPreferredSize(new Dimension(260, 600));
         sidebar.setBorder(BorderFactory.createEmptyBorder(20, 25, 60, 25));
 
-        lblLogo = new JLabel();
-        ImageIcon iconLogo = cargarIcono("/Infrastructure/resources/img/logo.png", 160, 140); 
-        if (iconLogo != null) {
-            lblLogo.setIcon(iconLogo);
-            lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
-            sidebar.add(lblLogo);
-            sidebar.add(Box.createRigidArea(new Dimension(0, 30))); 
-        }
-
+        cargarLogo(sidebar);
         sidebar.add(crearBotonNavegacion("HOME", "CARD_HOME"));
         sidebar.add(Box.createRigidArea(new Dimension(0, 15)));
         sidebar.add(crearBotonNavegacion("CONFIGURACIÓN", "CARD_CONFIG"));
@@ -66,24 +73,24 @@ public class PyralineDashboard extends JFrame {
         
         mainPanel.add(sidebar, BorderLayout.WEST);
 
+        // --- CONTENEDOR DE VISTAS DINÁMICAS ---
         cardLayout = new CardLayout();
         pnlCards = new JPanel(cardLayout);
         pnlCards.setOpaque(false);
-
         pnlCards.add(crearVistaHome(), "CARD_HOME");
         pnlCards.add(crearVistaHistorialMasivo(), "CARD_ALERTS");
         pnlCards.add(crearVistaConfiguracion(), "CARD_CONFIG");
 
         mainPanel.add(pnlCards, BorderLayout.CENTER);
 
-        // --- TIMER DE ALERTA VISUAL ---
-        timerParpadeo = new Timer(500, e -> {
-            lblSirena.setVisible(!lblSirena.isVisible());
-            esRojo = !esRojo;
-            lblEstado.getParent().setBackground(esRojo ? new Color(120, 0, 0) : new Color(0, 0, 0, 0));
-        });
+        // Timer para el efecto de parpadeo en emergencia
+        timerParpadeo = new Timer(500, e -> ejecutarEfectoSirena());
     }
 
+    /**
+     * Carga el archivo de audio para la alarma.
+     * @param ruta Path relativo del recurso .wav.
+     */
     private void configurarAudio(String ruta) {
         try {
             URL soundUrl = getClass().getResource(ruta);
@@ -93,32 +100,38 @@ public class PyralineDashboard extends JFrame {
                 clipAlerta.open(audioStream);
             }
         } catch (Exception e) {
-            System.err.println("(!) Error al cargar audio: " + e.getMessage());
+            // No detiene el programa, pero registra el fallo técnico
+            new AppException("Fallo al cargar recurso de audio.", e, getClass(), "configurarAudio");
         }
     }
 
     /**
-     * MÉTODO MAESTRO: Controla la emergencia (Visual + Sonoro).
+     * MÉTODO MAESTRO: Activa o desactiva la alerta sonora y visual.
+     * @param activa Estado de la emergencia.
      */
     public void setModoAlerta(boolean activa) {
         SwingUtilities.invokeLater(() -> {
-            if (activa) {
-                if (!timerParpadeo.isRunning()) {
-                    timerParpadeo.start();
-                    if (clipAlerta != null) {
-                        clipAlerta.setFramePosition(0);
-                        clipAlerta.loop(Clip.LOOP_CONTINUOUSLY); // Suena hasta apagar la alerta
+            try {
+                if (activa) {
+                    if (!timerParpadeo.isRunning()) {
+                        timerParpadeo.start();
+                        if (clipAlerta != null) {
+                            clipAlerta.setFramePosition(0);
+                            clipAlerta.loop(Clip.LOOP_CONTINUOUSLY);
+                        }
                     }
+                } else {
+                    timerParpadeo.stop();
+                    if (clipAlerta != null) clipAlerta.stop();
+                    limpiarEstadoVisual();
                 }
-            } else {
-                timerParpadeo.stop();
-                if (clipAlerta != null) clipAlerta.stop();
-                lblSirena.setVisible(false);
-                lblEstado.getParent().setBackground(new Color(0, 0, 0, 0));
+            } catch (Exception e) {
+                new AppException("Error al gestionar modo alerta UI.", e, getClass(), "setModoAlerta");
             }
         });
     }
 
+    /** Notifica desconexión física del hardware. */
     public void actualizarEstadoHardware(boolean conectado) {
         SwingUtilities.invokeLater(() -> {
             if (conectado) {
@@ -126,7 +139,7 @@ public class PyralineDashboard extends JFrame {
                 lblEstado.setForeground(Color.GREEN);
                 lblTemp.setForeground(Color.WHITE);
             } else {
-                setModoAlerta(false); // Apagamos sirenas si no hay hardware
+                setModoAlerta(false);
                 lblEstado.setText("ERROR: SENSOR DESCONECTADO");
                 lblEstado.setForeground(Color.RED);
                 lblTemp.setText("TEMPERATURA: -- °C");
@@ -135,10 +148,11 @@ public class PyralineDashboard extends JFrame {
         });
     }
 
+    /** Actualiza la medición térmica en tiempo real. */
     public void actualizarMonitoreo(float temp, boolean esAlerta) {
         lblTemp.setText("TEMPERATURA: " + String.format("%.2f", temp) + " °C");
         if (esAlerta) {
-            lblEstado.setText("ESTADO: ALERT");
+            lblEstado.setText("ESTADO: CRÍTICO");
             lblEstado.setForeground(AppStyle.COLOR_FONT); 
         } else {
             lblEstado.setText("ESTADO: NORMAL");
@@ -163,7 +177,6 @@ public class PyralineDashboard extends JFrame {
         lblEstado.setFont(AppStyle.FONT_BOLD.deriveFont(18f));
         lblEstado.setForeground(Color.GREEN);
 
-        // Icono de Sirena
         lblSirena = new JLabel();
         ImageIcon iconSirena = cargarIcono("/Infrastructure/resources/img/sirena.png", 100, 100);
         if (iconSirena != null) lblSirena.setIcon(iconSirena);
@@ -185,18 +198,19 @@ public class PyralineDashboard extends JFrame {
         pnlMain.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
 
-        JLabel titulo = new JLabel("CONFIGURACIÓN");
+        JLabel titulo = new JLabel("CONFIGURACIÓN DE SENSORES");
         titulo.setFont(AppStyle.FONT_BOLD.deriveFont(24f));
         titulo.setForeground(Color.WHITE);
         gbc.gridy = 0; gbc.insets = new Insets(0, 0, 40, 100);
         pnlMain.add(titulo, gbc);
 
+        // --- SELECTOR DE UMBRAL ---
         JPanel pnlSelector = new JPanel(new BorderLayout());
         pnlSelector.setOpaque(false);
         pnlSelector.setPreferredSize(new Dimension(400, 65));
         pnlSelector.setBorder(new LineBorder(COLOR_PURPLE, 2, true));
 
-        JLabel txtCambiar = new JLabel("  CAMBIAR UMBRAL");
+        JLabel txtCambiar = new JLabel("   AJUSTAR LÍMITE");
         txtCambiar.setFont(AppStyle.FONT_BOLD.deriveFont(16f));
         txtCambiar.setForeground(Color.WHITE);
         pnlSelector.add(txtCambiar, BorderLayout.WEST);
@@ -223,7 +237,8 @@ public class PyralineDashboard extends JFrame {
 
         gbc.gridy = 1; pnlMain.add(pnlSelector, gbc);
 
-        JButton btnGuardar = new JButton("GUARDAR CONFIGURACIÓN");
+        // --- BOTÓN GUARDAR ---
+        JButton btnGuardar = new JButton("GUARDAR CAMBIOS EN DISCO");
         btnGuardar.setPreferredSize(new Dimension(300, 45));
         btnGuardar.setFont(AppStyle.FONT_BOLD);
         btnGuardar.setBackground(Color.BLACK);
@@ -231,32 +246,20 @@ public class PyralineDashboard extends JFrame {
         btnGuardar.setBorder(new LineBorder(Color.GREEN, 2));
         
         btnGuardar.addActionListener(e -> {
-            if (pollingService != null) {
-                pollingService.setUmbralAlarma(valorUmbralTemporal);
-                JOptionPane.showMessageDialog(this, "<html><b style='color:green;'>UMBRAL GUARDADO</b><br>Límite actualizado a " + valorUmbralTemporal + "°C</html>");
+            try {
+                if (pollingService != null) {
+                    pollingService.setUmbralAlarma(valorUmbralTemporal);
+                    AppMSG.showInformation("Configuración guardada: Umbral a " + valorUmbralTemporal + "°C");
+                }
+            } catch (Exception ex) {
+                AppMSG.showError("No se pudo persistir la configuración.");
             }
         });
 
         gbc.gridy = 2; gbc.insets = new Insets(30, 0, 0, 100);
         pnlMain.add(btnGuardar, gbc);
 
-        JLabel lblFuego = new JLabel();
-        ImageIcon img = cargarIcono("/Infrastructure/resources/img/fire_icon.png", 80, 80);
-        if (img != null) lblFuego.setIcon(img);
-        gbc.gridy = 3; gbc.insets = new Insets(40, 0, 0, 100);
-        pnlMain.add(lblFuego, gbc);
-
         return pnlMain;
-    }
-
-    private void estilizarBotonFlecha(JButton b) {
-        b.setOpaque(false); b.setContentAreaFilled(false);
-        b.setForeground(COLOR_PURPLE); b.setBorder(null);
-        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
-
-    private void actualizarLabelUmbral() {
-        lblValorUmbral.setText(String.format("%.1f", valorUmbralTemporal) + " °C  ");
     }
 
     private JPanel crearVistaHistorialMasivo() {
@@ -274,7 +277,7 @@ public class PyralineDashboard extends JFrame {
         pnlContenedor.setOpaque(false);
         pnlContenedor.setBorder(new LineBorder(COLOR_PURPLE, 2));
 
-        JLabel titulo = new JLabel("HISTORIAL DE ALERTAS - MONITOREO TOTAL");
+        JLabel titulo = new JLabel("BITÁCORA DE EVENTOS TÉRMICOS");
         titulo.setFont(AppStyle.FONT_BOLD.deriveFont(22f));
         titulo.setForeground(Color.WHITE);
         titulo.setHorizontalAlignment(SwingConstants.CENTER);
@@ -292,53 +295,82 @@ public class PyralineDashboard extends JFrame {
         scroll.setBorder(BorderFactory.createEmptyBorder(0, 25, 20, 25));
         pnlContenedor.add(scroll, BorderLayout.CENTER);
 
-        JButton btnBorrar = new JButton("LIMPIAR REGISTROS DEL SISTEMA");
+        JButton btnBorrar = new JButton("VACIAR HISTORIAL FÍSICO");
         btnBorrar.setFont(AppStyle.FONT_BOLD.deriveFont(12f));
         btnBorrar.setBackground(new Color(60, 0, 0)); 
         btnBorrar.setForeground(Color.WHITE);
-        btnBorrar.setFocusPainted(false);
         btnBorrar.setBorder(new LineBorder(Color.RED, 1));
         
         btnBorrar.addActionListener(e -> {
-            int resp = JOptionPane.showConfirmDialog(this, "¿Seguro que desea vaciar el historial?", "Atención Mateo", JOptionPane.YES_NO_OPTION);
-            if(resp == JOptionPane.YES_OPTION) {
+            if (AppMSG.showConfirmYesNo("¿Seguro que desea eliminar todos los registros de Pyraline?")) {
                 try {
-                    if(new PYRALINEDAO().deleteAll()) {
+                    if (new PYRALINEDAO().deleteAll()) {
                         refrescarHistorial();
-                        JOptionPane.showMessageDialog(this, "Historial vaciado correctamente.");
+                        AppMSG.showInformation("Historial vaciado correctamente.");
                     }
-                } catch (Exception ex) { }
+                } catch (AppException ex) {
+                    AppMSG.showError("Fallo al limpiar la base de datos.");
+                }
             }
         });
         pnlContenedor.add(btnBorrar, BorderLayout.SOUTH);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.weightx = 1.0; gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH; 
+        gbc.weightx = 1.0; gbc.weighty = 1.0; gbc.fill = GridBagConstraints.BOTH; 
         gbc.insets = new Insets(10, 10, 20, 100); 
         pnlMain.add(pnlContenedor, gbc);
         return pnlMain;
     }
 
+    /** Consulta la base de datos y formatea el log en HTML. */
     public void refrescarHistorial() {
         try {
-            StringBuilder html = new StringBuilder("<html><body style='font-family:Consolas; color:white; font-size:14px;'>");
+            StringBuilder html = new StringBuilder("<html><body style='font-family:Consolas; color:white; font-size:13px;'>");
             List<PYRALINEDTO> logs = new PYRALINEDAO().readAll(); 
+            
             if (logs.isEmpty()) {
-                html.append("<p style='text-align:center; color:#888; padding-top:200px;'>LOG VACÍO: Esperando eventos...</p>");
+                html.append("<p style='text-align:center; color:#888; padding-top:150px;'>LISTA VACÍA: No hay alertas registradas.</p>");
             } else {
                 for (PYRALINEDTO log : logs) {
                     String color = (log.getIdTipoAlerta() == 3) ? "#00FF78" : "#FF5500"; 
-                    String msg = (log.getIdTipoAlerta() == 3) ? "ESTADO: NORMAL RESTAURADO" : "ALERTA: TEMPERATURA CRÍTICA DETECTADA";
-                    html.append("<div style='margin-bottom:12px; border-bottom: 1px solid #333; padding-bottom:8px;'>")
-                        .append("<b style='color:").append(color).append(";'> ▶ FECHA: </b>").append(log.getFechaHora()).append("<br>")
-                        .append("<span style='color:").append(color).append(";'> &nbsp;&nbsp;&nbsp;")
-                        .append(msg).append(" (").append(log.getTemperatura()).append(" °C)</span></div>");
+                    String msg = (log.getIdTipoAlerta() == 3) ? "ESTADO: NORMALIZADO" : "ALERTA: SOBRE UMBRAL";
+                    html.append("<div style='margin-bottom:10px; border-bottom: 1px solid #333;'>")
+                        .append("<b style='color:").append(color).append(";'>[ ").append(log.getFechaHora()).append(" ]</b><br>")
+                        .append("&nbsp;&nbsp;").append(msg).append(" (").append(log.getTemperatura()).append(" °C)</div>");
                 }
             }
             html.append("</body></html>");
             txtHistorial.setText(html.toString()); 
-        } catch (Exception e) { }
+        } catch (AppException e) {
+            AppMSG.showError("No se pudo refrescar la bitácora.");
+        }
+    }
+
+    // --- MÉTODOS DE APOYO Y ESTILO ---
+
+    private void ejecutarEfectoSirena() {
+        lblSirena.setVisible(!lblSirena.isVisible());
+        esRojo = !esRojo;
+        lblEstado.getParent().setBackground(esRojo ? new Color(120, 0, 0, 150) : new Color(0, 0, 0, 0));
+    }
+
+    private void limpiarEstadoVisual() {
+        lblSirena.setVisible(false);
+        lblEstado.getParent().setBackground(new Color(0, 0, 0, 0));
+    }
+
+    private void actualizarLabelUmbral() {
+        lblValorUmbral.setText(String.format("%.1f", valorUmbralTemporal) + " °C  ");
+    }
+
+    private void cargarLogo(JPanel sidebar) {
+        ImageIcon iconLogo = cargarIcono("/Infrastructure/resources/img/logo.png", 160, 140); 
+        if (iconLogo != null) {
+            lblLogo = new JLabel(iconLogo);
+            lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+            sidebar.add(lblLogo);
+            sidebar.add(Box.createRigidArea(new Dimension(0, 30))); 
+        }
     }
 
     public void setPollingService(ArduinoPollingService service) {
@@ -353,7 +385,6 @@ public class PyralineDashboard extends JFrame {
         b.setCursor(AppStyle.CURSOR_HAND); b.setBorder(BorderFactory.createLineBorder(COLOR_PURPLE, 2));
         b.setFocusPainted(false);
         b.addActionListener(e -> {
-            this.currentCard = card;
             cardLayout.show(pnlCards, card);
             if(card.equals("CARD_ALERTS")) refrescarHistorial(); 
         });
@@ -361,18 +392,23 @@ public class PyralineDashboard extends JFrame {
     }
 
     private JButton crearBotonSalida() {
-        JButton b = crearBotonNavegacion("LOG OUT", "");
+        JButton b = crearBotonNavegacion("CERRAR SESIÓN", "");
         for(java.awt.event.ActionListener al : b.getActionListeners()) b.removeActionListener(al);
         b.addActionListener(e -> { this.dispose(); new PyralineLogin().setVisible(true); });
         return b;
+    }
+
+    private void estilizarBotonFlecha(JButton b) {
+        b.setOpaque(false); b.setContentAreaFilled(false);
+        b.setForeground(COLOR_PURPLE); b.setBorder(null);
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private ImageIcon cargarIcono(String path, int width, int height) {
         URL url = getClass().getResource(path);
         if (url != null) {
             ImageIcon icon = new ImageIcon(url);
-            Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            return new ImageIcon(img);
+            return new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
         }
         return null;
     }

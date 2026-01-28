@@ -106,7 +106,7 @@ public class PyralineLogin extends JFrame {
                         }
                         
                         dashboard.setVisible(true);
-                        System.out.println("(✓) Sistema Pyraline activado para Mateo Sebastian.");
+                        System.out.println("(✓) Sistema Pyraline activado.");
                         
                     } catch (Exception ex) {
                         System.err.println("(!) Error al iniciar servicios de Pyraline: " + ex.getMessage());

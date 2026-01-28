@@ -49,7 +49,7 @@ public class TestDatabase {
                         String sql = buffer.toString().trim();
                         try {
                             stmt.execute(sql);
-                            // Resumen de ejecución para Mateo
+                            // Resumen de ejecución para 
                             String preview = (sql.length() > 50) ? sql.substring(0, 50).replace("\n", " ") + "..." : sql;
                             System.out.println("  [OK]: " + preview);
                         } catch (SQLException ex) {
