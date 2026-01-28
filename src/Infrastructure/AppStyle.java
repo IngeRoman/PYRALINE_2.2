@@ -7,7 +7,7 @@ import javax.swing.border.*;
 public abstract class AppStyle {
     private static final String FONT_FAMILY     = "NovaMono";
     
-    // LO QUE YA TENÍAS (No se toca)
+
     public static final Color COLOR_ACCENT      = new Color(255, 85, 0);   // Naranja Neón
     public static final Color COLOR_FONT        = new Color(220, 10, 20);  // Rojo técnico
     public static final Color COLOR_FONT_LIGHT  = new Color(100, 100, 100);

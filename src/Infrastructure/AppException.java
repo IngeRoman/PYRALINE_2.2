@@ -8,47 +8,59 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Gestiona las excepciones del sistema Pyraline, centralizando el log 
- * y la mensajería al usuario sin rastros de otros proyectos.
+ * <h1>AppException</h1>
+ * Centraliza el manejo de incidentes en Pyraline.
+ * Permite registrar logs técnicos y mostrar mensajes amigables al usuario.
+ * * @author Mateo Sebastian Ríos Taco
+ * @version 2.1
  */
 public class AppException extends Exception {
 
+    /**
+     * Constructor para capturar excepciones con trazabilidad completa.
+     * @param showMsg   Mensaje amigable para el usuario.
+     * @param e         Excepción raíz capturada.
+     * @param clase     Clase donde se originó el error.
+     * @param metodo    Método donde se originó el error.
+     */
     public AppException(String showMsg, Exception e, Class<?> clase, String metodo) {
-        // Usa el mensaje por defecto de AppConfig si showMsg llega vacío
         super((showMsg == null || showMsg.isBlank()) ? AppConfig.MSG_DEFAULT_ERROR : showMsg);
-        
-        // Registra el error técnico en el archivo log de Pyraline
         saveLogFile(e != null ? e.getMessage() : "Sin detalle técnico", clase, metodo);
     }
 
+    /**
+     * Constructor para errores de lógica (sin excepción previa).
+     */
+    public AppException(String showMsg, Class<?> clase, String metodo) {
+        this(showMsg, null, clase, metodo);
+    }
+
+    /**
+     * Persiste el error en el log físico de Pyraline de forma segura.
+     */
     private void saveLogFile(String logMsg, Class<?> clase, String metodo) {
-        // Obtiene la ruta desde app.properties (storage/Logs/PyralineSystem.log)
         String logPath = AppConfig.getLOGFILE();
         if (logPath == null || logPath.isEmpty()) 
             logPath = "storage/Logs/PyralineSystem.log"; 
 
         try {
             File file = new File(logPath);
-            // Crea las carpetas si no existen (evita el error de 'FileNotFound')
-            if (file.getParentFile() != null) 
+            if (file.getParentFile() != null && !file.getParentFile().exists()) 
                 file.getParentFile().mkdirs();
 
-            // Formato limpio: [FECHA] CLASE.METODO() ❱ MENSAJE
-            String entry = String.format("[%s] %s.%s() ❱ %s", 
-                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 
-                    (clase != null ? clase.getSimpleName() : "Desconocido"), 
-                    metodo, 
-                    logMsg);
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            String className = (clase != null) ? clase.getSimpleName() : "UnknownClass";
+            String entry = String.format("[%s] %s.%s() ❱ %s", timestamp, className, metodo, logMsg);
 
-            // 'true' para adjuntar (append) y no borrar lo anterior
-            try (PrintWriter writer = new PrintWriter(new FileWriter(logPath, true))) {
-                // Muestra en consola roja solo durante desarrollo
+            // Uso de try-with-resources para asegurar el cierre del archivo
+            try (FileWriter fw = new FileWriter(logPath, true);
+                 PrintWriter writer = new PrintWriter(fw)) {
+                
                 System.err.println(CMDColor.RED + " [PYRALINE-LOG] " + entry + CMDColor.RESET);
                 writer.println(entry);
             }
         } catch (Exception ex) {
-            // Si falla el log, al menos imprimimos en consola el error original
-            System.err.println("No se pudo escribir en el log: " + ex.getMessage());
+            System.err.println("CRÍTICO: Falló la escritura del log: " + ex.getMessage());
         }
     }
 }
