@@ -1,12 +1,14 @@
-package DataAccess.Helpers;
+package DataAccess.helpers;
 
-import DataAccess.Interfaces.IDAO;
-import Infrastructure.AppConfig;
-import Infrastructure.AppException;
+import Infrastructure.config.AppConfig;
+import Infrastructure.exeption.AppException;
+
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import DataAccess.interfaces.IDAO;
 
 public class DataHelperSQLiteDAO<T> implements IDAO<T> {
     protected final Class<T> DTOClass;

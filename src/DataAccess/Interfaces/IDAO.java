@@ -1,7 +1,8 @@
-package DataAccess.Interfaces;
+package DataAccess.interfaces;
 
-import Infrastructure.AppException;
 import java.util.List;
+
+import Infrastructure.exeption.AppException;
 
 public interface IDAO<T> {
     List<T> readAll()            throws AppException;
@@ -13,4 +14,3 @@ public interface IDAO<T> {
     Integer getMinReg(String tableCelName) throws AppException;
     Integer getMaxReg(String tableCelName) throws AppException;
 }
-    
