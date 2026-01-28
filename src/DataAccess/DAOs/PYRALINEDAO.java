@@ -1,4 +1,5 @@
 package DataAccess.DAOs;
+
 import DataAccess.DTOs.PYRALINEDTO;
 import DataAccess.Helpers.DataHelperSQLiteDAO;
 import Infrastructure.AppException;
@@ -10,18 +11,27 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO especializado en la gestión de registros del sistema Pyraline.
+ * Maneja la persistencia en la tabla física y la lectura desde la vista wsPRYLINE.
+ */
 public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
     
+    /**
+     * Inicializa el DAO vinculando la vista y la clave primaria principal.
+     * @throws AppException si el motor genérico falla al conectar.
+     */
     public PYRALINEDAO() throws AppException {
+        // Vinculación con la vista para lecturas genéricas
         super(PYRALINEDTO.class, "wsPRYLINE", "IdPYRALINE");
     }
 
     /**
-     * Elimina todos los registros de la tabla física PYRALINE.
-     * Es vital para el botón de mantenimiento del Dashboard.
+     * Vacía completamente el historial de alertas en la tabla física.
+     * @return true si el truncado de la tabla fue exitoso.
+     * @throws AppException si hay errores de acceso o la tabla está bloqueada.
      */
     public boolean deleteAll() throws AppException {
-        // Ejecutamos el comando sobre la TABLA física, no sobre la vista.
         String query = "DELETE FROM PYRALINE"; 
         try (Connection conn = openConnection();
              Statement stmt = conn.createStatement()) {
@@ -30,10 +40,17 @@ public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
             System.out.println(">>> [DAO] Historial vaciado correctamente.");
             return true;
         } catch (SQLException e) {
-            throw new AppException("Error al vaciar el historial de PYRALINE", e, getClass(), "deleteAll()");
+            // Captura errores de sintaxis SQL o fallos de conexión durante el borrado
+            throw new AppException("Fallo técnico al vaciar el historial físico.", e, getClass(), "deleteAll()");
         }
     }
 
+    /**
+     * Registra una nueva alerta térmica capturada por el sensor.
+     * @param entity Objeto con datos de lugar, tipo de alerta y temperatura.
+     * @return true si el insert fue confirmado.
+     * @throws AppException si los datos son inválidos o falla la restricción de integridad.
+     */
     @Override
     public boolean create(PYRALINEDTO entity) throws AppException {
         String query = "INSERT INTO PYRALINE (IdLugar, IdTipoAlerta, Temperatura) VALUES (?, ?, ?)";
@@ -47,14 +64,19 @@ public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
-            throw new AppException("Error al registrar alarma en PYRALINE", e, getClass(), "create()");
+            // Captura errores de inserción (ej. columnas inexistentes o tipos incompatibles)
+            throw new AppException("Error al registrar el evento térmico en la base de datos.", e, getClass(), "create()");
         }
     }
 
+    /**
+     * Obtiene el historial completo desde la vista wsPRYLINE.
+     * @return Lista de registros ordenados de forma descendente por fecha.
+     * @throws AppException si ocurre un fallo en la ejecución del SELECT.
+     */
     @Override
     public List<PYRALINEDTO> readAll() throws AppException {
         List<PYRALINEDTO> lista = new ArrayList<>();
-        // Consultamos la vista wsPRYLINE para obtener los datos formateados y ordenados.
         String query = "SELECT IdPYRALINE, IdTipoAlerta, Temperatura, Estado, FechaHora, FechaModifica FROM wsPRYLINE ORDER BY FechaHora DESC";
         
         try (Connection conn = openConnection();
@@ -65,7 +87,7 @@ public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
                 PYRALINEDTO dto = new PYRALINEDTO();
                 
                 dto.setIdPYRALINE(rs.getInt("IdPYRALINE"));
-                dto.setIdTipoAlerta(rs.getInt("IdTipoAlerta")); // Vital para los colores del Dashboard.
+                dto.setIdTipoAlerta(rs.getInt("IdTipoAlerta")); 
                 dto.setTemperatura(rs.getFloat("Temperatura"));
                 dto.setEstado(rs.getString("Estado"));
                 dto.setFechaHora(rs.getString("FechaHora"));
@@ -74,7 +96,8 @@ public class PYRALINEDAO extends DataHelperSQLiteDAO<PYRALINEDTO> {
                 lista.add(dto);
             }
         } catch (SQLException e) {
-            throw new AppException("Error al leer la vista wsPRYLINE.", e, getClass(), "readAll()");
+            // Captura fallos de lectura, especialmente si la vista wsPRYLINE está corrupta o falta
+            throw new AppException("No se pudo leer la vista histórica wsPRYLINE.", e, getClass(), "readAll()");
         }
         return lista;
     }
