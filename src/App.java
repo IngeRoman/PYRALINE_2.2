@@ -1,5 +1,6 @@
-import UserInterface.Form.PyralineLogin;
 import javax.swing.SwingUtilities;
+
+import UI.form.PyralineLogin;
 
 public class App {
     public static void main(String[] args) {

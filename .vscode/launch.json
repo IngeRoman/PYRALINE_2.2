@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestDatabase",
+            "request": "launch",
+            "mainClass": "Test.TestDatabase",
+            "projectName": "PYRALINE_2.2_c9a7cec7"
+        },
+        {
+            "type": "java",
             "name": "App",
             "request": "launch",
             "mainClass": "App",
